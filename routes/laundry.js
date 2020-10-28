@@ -5,6 +5,8 @@ const withAuth = require("../helpers/middleware");
 
 const User = require("../models/user");
 
+const laundryModel = require('../models/laundry-pickup');
+
 router.get("/dashboard", withAuth, async (req, res, next) => {
   if (req.userID) {
     try {
@@ -52,6 +54,37 @@ router.get('/launderers', withAuth, async (req, res, next) => {
         next(error);
         return;
     }
+})
+
+router.get('/launderers/:id', withAuth, async (req, res, next) => {
+    const laundererId = req.params.id;
+
+    try {
+        const theUser = await User.findById(laundererId)
+        res.render('laundry/launderer-profile', { theLaunderer: theUser })
+    } catch (error) {
+        next(error);
+        return;
+    }
+})
+
+router.post('/laundry-pickups', withAuth, async (req, res, next) => {
+    const pickupInfo = {
+        pickupDate: req.body.pickupDate,
+        launderer: req.body.laundererId,
+        user: req.userID,
+    }
+
+    const thePickup = new laundryModel(pickupInfo);
+
+    thePickup.save((err) => {
+        if (err) {
+            next(err);
+            return;
+        }
+
+        res.redirect('/dashboard')
+    })
 })
 
 module.exports = router;
