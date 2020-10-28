@@ -19,10 +19,8 @@ router.get("/dashboard", withAuth, async (req, res, next) => {
       if (res.locals.currentUserInfo.isLaunderer) {
         query = { launderer: res.locals.currentUserInfo._id };
       } else {
-        query = { user: res.lcoals.currentUserInfo._id };
+        query = { user: res.locals.currentUserInfo._id };
       }
-      // realizamos una búsqueda de LaundryPickup a partir de 'query' y populamos el resultado para traer el valor 'name' de las keys 'user' y 'launderer'
-      // (Esta variable mostrará una instancia de LaundryPickup, el cual posee referencias del launderer que realiza el pickup y del user que lo solicita. Ver modelo en caso de confusión.)
 
       const pickupDocs = await LaundryPickup.find(query)
         .populate('user')
@@ -64,7 +62,10 @@ router.post("/launderers", withAuth, async (req, res, next) => {
 
 router.get("/launderers", withAuth, async (req, res, next) => {
   try {
-    const launderersList = await User.find({ isLaunderer: true });
+    const launderersList = await User.find( {$and: [
+        { isLaunderer: true },
+        { _id: { $ne: req.userID } }
+    ]})
     res.render("laundry/launderers", { launderers: launderersList });
   } catch (error) {
     next(error);
