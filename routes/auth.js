@@ -9,6 +9,8 @@ const jwt = require("jsonwebtoken");
 
 const User = require("../models/user");
 
+const withAuth = require('../helpers/middleware')
+
 router.get("/signup", (req, res, next) => {
   res.render("auth/signup", { errorMessage: "" });
 });
@@ -60,7 +62,7 @@ router.post("/login", async (req, res, next) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      res.render("auth/login", {errorMessage: "This email doesn't exist!"});
+      res.render("auth/login", { errorMessage: "This email doesn't exist!" });
       return;
     } else if (bcrypt.compareSync(password, user.password)) {
       const userWithoutPass = await User.findOne({ email }).select("-password");
@@ -76,8 +78,13 @@ router.post("/login", async (req, res, next) => {
       res.render("auth/login", { errorMessage: "Incorrect password" });
     }
   } catch (error) {
-      console.log(error);
+    console.log(error);
   }
+});
+
+router.get("/logout", withAuth, (req, res, next) => {
+  res.cookie("token", "", { expires: new Date(0) });
+  res.redirect("/");
 });
 
 module.exports = router;
