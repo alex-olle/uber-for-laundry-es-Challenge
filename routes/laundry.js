@@ -44,4 +44,14 @@ router.post("/launderers", withAuth, async (req, res, next) => {
   }
 });
 
+router.get('/launderers', withAuth, async (req, res, next) => {
+    try {
+        const launderersList = await User.find({ isLaunderer: true });
+        res.render('laundry/launderers', { launderers: launderersList })
+    } catch (error) {
+        next(error);
+        return;
+    }
+})
+
 module.exports = router;
