@@ -12,7 +12,7 @@ router.get("/dashboard", withAuth, async (req, res, next) => {
     try {
       const userUpdated = await User.findById(req.userID);
 
-      res.locals.currentUserInfo = userUpdated;
+      res.locals.currentUserInfo = userUpdated; 
 
       let query;
 
